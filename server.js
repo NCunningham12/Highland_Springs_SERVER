@@ -51,10 +51,8 @@ app.get('/users', (req, res) => {
 // Sign-up
 app.post('/users', async (req, res) => {
   try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-
     const username = req.body.username;
-    const password = hashedPassword;
+    const password = req.body.password;
 
     db.query(
       'INSERT INTO users (username, password) VALUES (?,?)',
@@ -74,8 +72,27 @@ app.post('/users', async (req, res) => {
 
 // Login
 app.post('/users/login', async (req, res) => {
-  
-})
+  const username = req.body.username;
+  const password = req.body.password;
+
+  if (username && password) {
+    db.query(
+      'SELECT * FROM users WHERE username = ? AND password = ?',
+      [username, password],
+      (error, results) => {
+        if (error) {
+          throw error;
+        }
+        if (results.length > 0) {
+          // Authenticate user
+          console.log('User Authenticated')
+        } else {
+          res.send('Incorrect username and/or password');
+        }
+      }
+    );
+  }
+});
 
 app.listen(3001, () => {
   console.log('Server Running on Port 3001');
