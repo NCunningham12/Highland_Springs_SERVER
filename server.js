@@ -85,6 +85,7 @@ app.post('/users/login', async (req, res) => {
         }
         if (results.length > 0) {
           // Authenticate user
+          res.send('User Authenticated')
           console.log('User Authenticated')
         } else {
           res.send('Incorrect username and/or password');
