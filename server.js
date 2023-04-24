@@ -51,12 +51,14 @@ app.get('/users', (req, res) => {
 // Sign-up
 app.post('/users', async (req, res) => {
   try {
+    const firstName = req.body.first;
+    const lastName = req.body.last;
     const username = req.body.username;
     const password = req.body.password;
 
     db.query(
-      'INSERT INTO users (username, password) VALUES (?,?)',
-      [username, password],
+      'INSERT INTO users (first, last, username, password) VALUES (?,?,?,?)',
+      [firstName, lastName, username, password],
       (err, result) => {
         if (err) {
           console.log(err);
@@ -85,8 +87,8 @@ app.post('/users/login', async (req, res) => {
         }
         if (results.length > 0) {
           // Authenticate user
-          res.send('User Authenticated')
-          console.log('User Authenticated')
+          res.send('User Authenticated');
+          console.log('User Authenticated');
         } else {
           res.send('Incorrect username and/or password');
         }
