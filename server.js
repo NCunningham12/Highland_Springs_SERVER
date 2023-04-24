@@ -2,16 +2,19 @@ const express = require('express');
 const app = express();
 const mysql = require('mysql2');
 const cors = require('cors');
+const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
+
+dotenv.config()
 
 app.use(cors());
 app.use(express.json());
 
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'NJDevils1313!',
-  database: 'highland_springs_golf',
+  host: process.env.HOST,
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE,
 });
 
 // Adding New Members

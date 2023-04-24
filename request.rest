@@ -20,6 +20,6 @@ Content-Type: application/json
 {
   "first": "Bob",
   "last": "Cunningham",
-  "username": "Bobert",
-  "password": "004185"
+  "username": "bobcunnin",
+  "password": "oooo4185"
 }
