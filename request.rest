@@ -1,25 +1,26 @@
+// Get Users List
 GET http://localhost:3001/users
 
 ###
 
+// Register User
 POST http://localhost:3001/users
 Content-Type: application/json
 
 {
-  "first": "Ava",
-  "last": "Cunningham",
-  "username": "lillyprincess",
-  "password": "500500"
+  "first": "Test4",
+  "last": "Test4",
+  "username": "test4",
+  "password": "testing"
 }
 
 ###
 
+// Login
 POST http://localhost:3001/login
 Content-Type: application/json
 
 {
-  "first": "Bob",
-  "last": "Cunningham",
-  "username": "bobcunnin",
-  "password": "oooo4185"
+  "username": "test4",
+  "password": "testing"
 }

@@ -3,9 +3,10 @@ const app = express();
 const mysql = require('mysql2');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-dotenv.config()
+dotenv.config();
 
 app.use(cors());
 app.use(express.json());
@@ -53,32 +54,33 @@ app.get('/users', (req, res) => {
 
 // Sign-up
 app.post('/users', async (req, res) => {
-  try {
-    const firstName = req.body.first;
-    const lastName = req.body.last;
-    const username = req.body.username;
-    const password = req.body.password;
+  const User = db.query('Select username FROM users', (error, results) => {
+    if (error) {
+      console.log(error);
+    }
+  });
 
-    db.query(
-      'INSERT INTO users (first, last, username, password) VALUES (?,?,?,?)',
-      [firstName, lastName, username, password],
-      (err, result) => {
+  const { first, last, username, password } = req.body;
+  bcrypt.hash(password, 10).then((hash) => {
+    db.promise()
+      .query(
+        'INSERT INTO users (first, last, username, password) VALUES (?,?,?,?)',
+        [first, last, username, hash]
+      )
+      .then(() => {
+        res.json('USER REGISTERED');
+      })
+      .catch((err) => {
         if (err) {
-          console.log(err);
-        } else {
-          res.send('User Created');
+          res.status(400).json({ error: err });
         }
-      }
-    );
-  } catch {
-    res.status(500).send();
-  }
+      });
+  });
 });
 
 // Login
-app.post('/login', async (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
 
   if (username && password) {
     db.query(
@@ -88,6 +90,7 @@ app.post('/login', async (req, res) => {
         if (error) {
           throw error;
         }
+        console.log(results)
         if (results.length > 0) {
           // Authenticate user
           res.send('User Authenticated');
@@ -100,6 +103,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.listen(3001, () => {
-  console.log('Server Running on Port 3001');
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Server Running on Port ${PORT}`);
 });
