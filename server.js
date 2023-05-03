@@ -10,6 +10,7 @@ dotenv.config();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 const db = mysql.createConnection({
   host: process.env.HOST,
@@ -54,12 +55,6 @@ app.get('/users', (req, res) => {
 
 // Sign-up
 app.post('/users', async (req, res) => {
-  const User = db.query('Select username FROM users', (error, results) => {
-    if (error) {
-      console.log(error);
-    }
-  });
-
   const { first, last, username, password } = req.body;
   bcrypt.hash(password, 10).then((hash) => {
     db.promise()
@@ -82,26 +77,44 @@ app.post('/users', async (req, res) => {
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
 
-  if (username && password) {
-    db.query(
-      'SELECT * FROM users WHERE username = ? AND password = ?',
-      [username, password],
-      (error, results) => {
-        if (error) {
-          throw error;
-        }
-        console.log(results)
-        if (results.length > 0) {
-          // Authenticate user
-          res.send('User Authenticated');
-          console.log('User Authenticated');
-        } else {
-          res.send('Incorrect username and/or password');
-        }
+  const user = db.query(
+    'SELECT username FROM users WHERE username = ?',
+    [username],
+    (error, results) => {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log(results[0].username);
+        return results[0].username;
       }
-    );
+    }
+  );
+
+  if (!user) {
+    res.status(400).json({ error: 'User does not exist' });
   }
+
+  res.json('Successful Login');
 });
+
+// if (username && password) {
+//   db.query(
+//     'SELECT * FROM users WHERE username = ? AND password = ?',
+//     [username, password],
+//     (error, results) => {
+//       if (error) {
+//         throw error;
+//       }
+//       if (results.length > 0) {
+//         // Authenticate user
+//         res.send('User Authenticated');
+//         console.log('User Authenticated');
+//       } else {
+//         res.send('Incorrect username and/or password');
+//       }
+//     }
+//   );
+// }
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

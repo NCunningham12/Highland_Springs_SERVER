@@ -8,9 +8,9 @@ POST http://localhost:3001/users
 Content-Type: application/json
 
 {
-  "first": "Test4",
-  "last": "Test4",
-  "username": "test4",
+  "first": "Test7",
+  "last": "Test7",
+  "username": "test7",
   "password": "testing"
 }
 
@@ -21,6 +21,6 @@ POST http://localhost:3001/login
 Content-Type: application/json
 
 {
-  "username": "test4",
-  "password": "testing"
+  "username": "bobcunnin",
+  "password": "oooo4185"
 }
