@@ -116,6 +116,17 @@ app.post('/login', (req, res) => {
 //   );
 // }
 
+// Member List
+app.get('/members', (req, res) => {
+  db.query('SELECT * FROM members', (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server Running on Port ${PORT}`);

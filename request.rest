@@ -24,3 +24,10 @@ Content-Type: application/json
   "username": "bobcunnin",
   "password": "oooo4185"
 }
+
+###
+
+// Member List
+GET http://localhost:3001/members
+
+###
