@@ -3,7 +3,6 @@ const app = express();
 const mysql = require('mysql2');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
 dotenv.config();
@@ -118,7 +117,17 @@ app.post('/login', (req, res) => {
 
 // Member List
 app.get('/members', (req, res) => {
-  db.query('SELECT * FROM members', (err, result) => {
+  db.query('SELECT * FROM members ORDER BY last', (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+app.get('/members-handicap', (req, res) => {
+  db.query('SELECT * FROM members ORDER BY handicap', (err, result) => {
     if (err) {
       console.log(err);
     } else {
@@ -155,7 +164,6 @@ app.delete('/delete/:id', (req, res) => {
 })
 
 // Change List Order
-app
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
