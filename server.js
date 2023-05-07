@@ -53,7 +53,7 @@ app.get('/users', (req, res) => {
 });
 
 // Sign-up
-app.post('/users', async (req, res) => {
+app.post('/sign-up', async (req, res) => {
   const { first, last, username, password } = req.body;
   bcrypt.hash(password, 10).then((hash) => {
     db.promise()
