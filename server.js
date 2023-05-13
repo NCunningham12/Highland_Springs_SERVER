@@ -136,34 +136,46 @@ app.get('/members-handicap', (req, res) => {
   });
 });
 
-// Update Member Info
-app.put('/members', (req, res) => {
-  const id = req.body.id
-  const handicap = req.body.handicap
-
-  db.query('UPDATE members SET handicap = ? WHERE id = ?', [handicap, id], (err, result) => {
+app.get('/members/:id', (req, res) => {
+  const id = req.params.id;
+  db.query('SELECT * FROM members WHERE id = ?', id, (err, result) => {
     if (err) {
-      console.log(err)
+      console.log(err);
     } else {
-      res.send(result)
+      res.send(result);
     }
-  })
-})
+  });
+});
 
+// Update Member Info
+app.put('/members/:id', (req, res) => {
+  const id = req.params.id;
+  const handicap = req.body.handicap;
+
+  db.query(
+    'UPDATE members SET handicap = ? WHERE id = ?',
+    [handicap, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
 
 // Delete Member
 app.delete('/delete/:id', (req, res) => {
-  const id = req.params.id
+  const id = req.params.id;
   db.query('DELETE FROM members WHERE id = ?', id, (err, result) => {
     if (err) {
-      console.log(err)
+      console.log(err);
     } else {
-      res.send(result)
+      res.send(result);
     }
-  })
-})
-
-// Change List Order
+  });
+});
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
