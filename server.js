@@ -1,4 +1,5 @@
 const express = require('express');
+const session = require('express-session');
 const app = express();
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -10,6 +11,13 @@ dotenv.config();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 
 const db = mysql.createConnection({
   host: process.env.HOST,
@@ -55,65 +63,71 @@ app.get('/users', (req, res) => {
 // Sign-up
 app.post('/sign-up', async (req, res) => {
   const { first, last, username, password } = req.body;
-  bcrypt.hash(password, 10).then((hash) => {
-    db.promise()
-      .query(
-        'INSERT INTO users (first, last, username, password) VALUES (?,?,?,?)',
-        [first, last, username, hash]
-      )
-      .then(() => {
-        res.json('USER REGISTERED');
-      })
-      .catch((err) => {
-        if (err) {
-          res.status(400).json({ error: err });
-        }
-      });
-  });
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  try {
+    db.query(
+      'INSERT INTO users (first, last, username, password) VALUES (?, ?, ?, ?)',
+      [first, last, username, hashedPassword]
+    );
+    res.status(201).send('User successfully registered!');
+  } catch (error) {
+    console.error('Error registering user:', error);
+    res.status(500).send('Error registering user');
+  }
 });
 
 // Login
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
-  const user = db.query(
-    'SELECT username FROM users WHERE username = ?',
-    [username],
-    (error, results) => {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log(results[0].username);
-        return results[0].username;
+  // The syntax here is wrong. Find a way to get the logic out of the callback while still having access to hashedPassword //
+  try {
+    db.query(
+      'SELECT password FROM users WHERE username = ?',
+      [username],
+      (err, results) => {
+        if (err) {
+          console.error('Error: ', err);
+          return;
+        }
+
+        const hashedPassword = results[0].password;
+
+        const isPasswordValid = bcrypt.compare(
+          password,
+          hashedPassword,
+          (err, isMatch) => {
+            if (err) throw err;
+
+            if (isMatch) {
+              console.log('Password matched hashed password!');
+            } else {
+              console.log('Password did not match hashed password');
+            }
+          }
+        );
+
+        if (isPasswordValid === true) {
+          res.status(200).send('Login successful');
+        }
+
+        if (isPasswordValid === false) {
+          return res.status(401).send('Invalid username or password');
+        }
       }
-    }
-  );
+    );
 
-  if (!user) {
-    res.status(400).json({ error: 'User does not exist' });
+    const user = db.query('SELECT username FROM users WHERE username = ?', [
+      username,
+    ]);
+
+    req.session.userId = user.id;
+  } catch (error) {
+    console.error('Error logging in: ', error);
+    res.status(500).send('Error logging in');
   }
-
-  res.json('Successful Login');
 });
-
-// if (username && password) {
-//   db.query(
-//     'SELECT * FROM users WHERE username = ? AND password = ?',
-//     [username, password],
-//     (error, results) => {
-//       if (error) {
-//         throw error;
-//       }
-//       if (results.length > 0) {
-//         // Authenticate user
-//         res.send('User Authenticated');
-//         console.log('User Authenticated');
-//       } else {
-//         res.send('Incorrect username and/or password');
-//       }
-//     }
-//   );
-// }
 
 // Member List
 app.get('/members', (req, res) => {
