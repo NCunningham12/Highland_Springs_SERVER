@@ -80,53 +80,57 @@ app.post('/sign-up', async (req, res) => {
 // Login
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-
-  // The syntax here is wrong. Find a way to get the logic out of the callback while still having access to hashedPassword //
-  try {
-    db.query(
-      'SELECT password FROM users WHERE username = ?',
-      [username],
-      (err, results) => {
-        if (err) {
-          console.error('Error: ', err);
-          return;
-        }
-
-        const hashedPassword = results[0].password;
-
-        const isPasswordValid = bcrypt.compare(
-          password,
-          hashedPassword,
-          (err, isMatch) => {
-            if (err) throw err;
-
-            if (isMatch) {
-              console.log('Password matched hashed password!');
-            } else {
-              console.log('Password did not match hashed password');
-            }
-          }
-        );
-
-        if (isPasswordValid === true) {
-          res.status(200).send('Login successful');
-        }
-
-        if (isPasswordValid === false) {
-          return res.status(401).send('Invalid username or password');
-        }
-      }
-    );
-
-    const user = db.query('SELECT username FROM users WHERE username = ?', [
-      username,
-    ]);
-
-    req.session.userId = user.id;
-  } catch (error) {
-    console.error('Error logging in: ', error);
-    res.status(500).send('Error logging in');
+  if (!username || !password) {
+    return res
+      .status(400)
+      .json({ message: 'Username and password are required' });
   }
+
+  db.query(
+    'SELECT * FROM users WHERE username = ?',
+    [username],
+    async (err, results) => {
+      if (err) {
+        throw err;
+      }
+
+      if (results.length === 0) {
+        res.status(401).json({ message: 'Invalid username or password' });
+      }
+
+      const user = results[0];
+      const hashedPassword = user.password;
+
+      const match = await bcrypt.compare(password, hashedPassword);
+
+      if (match) {
+        req.session.user = {
+          id: user.id,
+          first: user.first,
+          last: user.last,
+          username: user.username,
+        };
+        res.status(200).json({
+          message: 'Login successful',
+          first_name: req.session.first,
+          last_name: req.session.last,
+          user: req.session.user,
+        });
+      } else {
+        res.status(401).json({ message: 'Invalid username or password' });
+      }
+    }
+  );
+});
+
+//Logout
+app.get('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Could not log out' });
+    }
+    res.json({ message: 'Logged out successfully' });
+  });
 });
 
 // Member List

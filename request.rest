@@ -8,9 +8,9 @@ POST http://localhost:3001/sign-up
 Content-Type: application/json
 
 {
-  "first": "test2",
-  "last": "testing",
-  "username": "testtest",
+  "first": "test1",
+  "last": "test11",
+  "username": "test",
   "password": "testing"
 }
 
@@ -21,9 +21,14 @@ POST http://localhost:3001/login
 Content-Type: application/json
 
 {
-  "username": "testtest",
+  "username": "test",
   "password": "testing"
 }
+
+###
+
+// Logout
+GET http://localhost:3001/logout
 
 ###
 
