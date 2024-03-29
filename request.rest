@@ -8,10 +8,10 @@ POST http://localhost:3001/sign-up
 Content-Type: application/json
 
 {
-  "first": "test1",
-  "last": "test11",
-  "username": "test",
-  "password": "testing"
+  "first": "Test1",
+  "last": "Test11",
+  "username": "test1",
+  "password": "test1!"
 }
 
 ###
@@ -21,8 +21,8 @@ POST http://localhost:3001/login
 Content-Type: application/json
 
 {
-  "username": "test",
-  "password": "testing"
+  "username": "test1",
+  "password": "test1!"
 }
 
 ###
@@ -34,5 +34,10 @@ GET http://localhost:3001/logout
 
 // Member List
 GET http://localhost:3001/members
+
+###
+
+// Get Specific Member
+GET http://localhost:3001/members/:id
 
 ###

@@ -3,6 +3,8 @@ const session = require('express-session');
 const app = express();
 const mysql = require('mysql2');
 const cors = require('cors');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 
@@ -10,12 +12,22 @@ dotenv.config();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(
+  new LocalStrategy(async (username, password, done) => {
+    try {
+      const user = await User.findone({ username: username });
+    } catch (error) {}
   })
 );
 
@@ -154,7 +166,7 @@ app.get('/members-handicap', (req, res) => {
   });
 });
 
-app.get('/members/:id', (req, res) => {
+app.get(`/members/:id`, (req, res) => {
   const id = req.params.id;
   db.query('SELECT * FROM members WHERE id = ?', id, (err, result) => {
     if (err) {
